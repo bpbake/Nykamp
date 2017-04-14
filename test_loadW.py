@@ -14,27 +14,40 @@ import numpy as np
 import math
 
 N = 1000
+p = 0.04
+i = 1
 print("N={0}".format(N))
 
-W_filename = "W_N{0}_{1}.pickle".format(N,1)
-print("filename: {0} \n".format(filename))
+#read in pickled W matrix
+W_filename = "matrices\W_N{0}_p{1}_{2}.pickle".format(N,p,i)
 
-with open(W_filename, 'rb') as fp:
+with open(W_filename, 'rb') as wf:
     try:
-        W = pickle.load(fp)
+        W = pickle.load(wf)
     except (EOFError):
         print("unpickling error")
-        
-stat_filename = "Stats_W_N{0}_{1}.pickle".format(N,1)
 
-with open(stat_filename, 'rb') as fs:
+# reading in pickled stats file:        
+stat_filename = "matrices\Stats_W_N{0}_p{1}_{2}.pickle".format(N,p,i)
+with open(stat_filename, 'rb') as sf:
     try:
-        stats = pickle.load(fs)
+        stats = pickle.load(sf)
     except (EOFError):
         print("unpickling error")
 
 print(stats)
 
+# add a new entry to the stats dictionary
+stats["hi"] = 5 #key= "hi", value=5
+
+print(stats)
+
+# save updated stats dictionary as a picle file
+stats_with_results_filename = "matrices\StatsWithSync_W_N{0}_p{1}_{2}.pickle".format(N,p,i)
+with open(stats_with_results_filename, 'wb') as f:
+    pickle.dump(stats, f)
+
+# plot the W matrix
 plt.matshow(W)
     
 # generate statistics of matrix
