@@ -23,6 +23,7 @@ import math
 
 start_scope()
 
+p_AVG = 0.04
 NI = 1000 #Number of excitatory neurons
 
 tauI = 10*ms
@@ -71,59 +72,61 @@ SII = Synapses(GI, GI,"w:volt",on_pre='v_post +=w') #Synapse from inhibitory neu
 SII.connect()
 #SII.connect(condition='i!=j', p=pii)
 
-######Load in matrix
-L = math.inf
-alpha_conv=0.3
-alpha_div=0.3
-alpha_chain = 0.3
-
-filename = "createW\W_N1000_L100_Alpha0.39.pickle"
-#"ws/W_N{0}_L{1}_c{2}_d{3}_ch{4}.pickle".format(NI,L,alpha_conv,alpha_div,alpha_chain)
-#filename = "ws/W_N{0}_L{1}_c{2}_d{3}_ch{4}.txt".format(NI,L,alpha_conv,alpha_div,alpha_chain)
-
-with open(filename, 'rb') as fp:
-    try:
-        W = pickle.load(fp)
-        #W=numpy.loadtxt(filename)
-    except (EOFError):
-        print("unpickling error")
-
-
-        
-SII.w=W.transpose().flatten()*jii
-
-
-
-
-statemon = StateMonitor(GI, 'v', record=0)
-spikemon = SpikeMonitor(GI)
-
-PRMi = PopulationRateMonitor(GI)
-
-# run(transienttime)
-
-# if spikemon.num_spikes > (transienttime*NI/refract*0.5):
-#     print("\nnetwork saturated, skipping matrix\n")
-
-# if spikemon.num_spikes < (2*NI):
-#     print("\nnetwork not spiking, skipping matrix\n")
+######Loop through matrix
+start_index = int(input("enter a starting index: "))
+stop_index = int(input("enter a stopping index (included): "))
+for W_index in range(start_index, stop_index+1):
+    W_filename = "matrices\W_N{0}_p{1}_{2}.pickle".format(NI,p)_AVG,W_index)
+    stat_filename = "matrices\Stats_W_N{0}_p{1}_{2}.pickle".format(NI,p_AVG,W_index)
     
-run(simulationtime)
-
-i_synchrony = analyze_autocor(PRMi.rate)
-
-
-figure(figsize=(8,5))
-#subplot(122)
-#plot(statemon.t/ms, statemon.v[0])
-#xlabel('Time (ms)')
-#ylabel('v')
-
-#subplot(121)
-plot(spikemon.t/ms,spikemon.i, '.k')
-xlabel('Time (ms)')
-ylabel('Neuron index')
-plt.tight_layout()
-
-print("\nExcitatory Synchrony = {}".format(i_synchrony))
-   
+    with open(W_filename, 'rb') as wf:
+        try:
+            W = pickle.load(wf)
+            #W=numpy.loadtxt(filename)
+        except (EOFError):
+            print("unpickling error")
+            
+    with open(stat_filename, 'rb') as sf:
+        try:
+            stats = pickle.load(sf)
+        except (EOFError):
+            print("unpickling error")
+    
+            
+    SII.w=W.transpose().flatten()*jii
+    
+    
+    
+    
+    statemon = StateMonitor(GI, 'v', record=0)
+    spikemon = SpikeMonitor(GI)
+    
+    PRMi = PopulationRateMonitor(GI)
+    
+    # run(transienttime)
+    
+    # if spikemon.num_spikes > (transienttime*NI/refract*0.5):
+    #     print("\nnetwork saturated, skipping matrix\n")
+    
+    # if spikemon.num_spikes < (2*NI):
+    #     print("\nnetwork not spiking, skipping matrix\n")
+        
+    run(simulationtime)
+    
+    i_synchrony = analyze_autocor(PRMi.rate)
+    
+    
+    figure(figsize=(8,5))
+    #subplot(122)
+    #plot(statemon.t/ms, statemon.v[0])
+    #xlabel('Time (ms)')
+    #ylabel('v')
+    
+    #subplot(121)
+    plot(spikemon.t/ms,spikemon.i, '.k')
+    xlabel('Time (ms)')
+    ylabel('Neuron index')
+    plt.tight_layout()
+    
+    print("\nExcitatory Synchrony = {}".format(i_synchrony))
+       
