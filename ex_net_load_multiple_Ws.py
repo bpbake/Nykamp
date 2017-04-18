@@ -13,6 +13,13 @@ except:
 
 from analyze import analyze_autocor
 
+try:
+    del input
+except:
+    pass
+
+input_orig = input
+
 from brian2 import *
 
 import numpy
@@ -24,6 +31,7 @@ import math
 start_scope()
 
 N = 1000 #Number of excitatory neurons
+p_AVG =0.04
 
 tau = 10*ms
 Er = -60*mV
@@ -56,14 +64,9 @@ ext_mag=1*mV
 P = PoissonGroup(N, ext_rate)
 S = Synapses(P,G, on_pre="v+=ext_mag")
 S.connect(j='i')
-
 #When source neuron fires a spike the target neuron will jump below value
 
-j = 0.1*mV
-
-#Weight of neuron connection
-
-p_avg =0.04
+j = 0.1*mV #Weight of neuron connection
 
 delta=2*ms
 
@@ -76,27 +79,27 @@ S.connect()
 #alpha_conv=0.3
 #alpha_div=0.3
 #alpha_chain = 0.3
-start_index = int(input("enter a starting index: "))
-end_index = int(input("enter end index"))
+start_index = int(input_orig("enter a starting index: "))
+end_index = int(input_orig("enter end index: "))
 
-for i in range(start_index, end_index):
+for w_index in range(start_index, end_index+1):
     
-    filename = "W_N{0}_p{1}_{2}.pickle".format(N,p_avg,i)
+    filename = "matrices\W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index)
     #"ws/W_N{0}_L{1}_c{2}_d{3}_ch{4}.pickle".format(NI,L,alpha_conv,alpha_div,alpha_chain)
     #filename = "ws/W_N{0}_L{1}_c{2}_d{3}_ch{4}.txt".format(NI,L,alpha_conv,alpha_div,alpha_chain)
     
-    with open(filename, 'rb') as fp:
+    with open(filename, 'rb') as wf:
         try:
-            W = pickle.load(fp)
+            W = pickle.load(wf)
             #W=numpy.loadtxt(filename)
         except (EOFError):
             print("unpickling error")
     
-    stat_filename = "Stats_W_N{0}_p{1}_{2}.pickle".format(N,p_avg,i)
+    stats_filename = "matrices\Stats_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index)
     
-    with open(stats_filename, 'rb') as fp:
+    with open(stats_filename, 'rb') as sf:
         try:
-            stats = pickle.load(fp)
+            stats = pickle.load(sf)
             #W=numpy.loadtxt(filename)
         except (EOFError):
             print("unpickling error")
@@ -108,7 +111,7 @@ for i in range(start_index, end_index):
     statemon = StateMonitor(G, 'v', record=0)
     spikemon = SpikeMonitor(G)
     
-    PRMi = PopulationRateMonitor(G)
+    PRM = PopulationRateMonitor(G)
     
     # run(transienttime)
     
@@ -120,7 +123,7 @@ for i in range(start_index, end_index):
         
     run(simulationtime)
     
-    synchrony = analyze_autocor(PRMi.rate)
+    synchrony = analyze_autocor(PRM.rate)
     
     
     figure(figsize=(8,5))
@@ -136,9 +139,11 @@ for i in range(start_index, end_index):
     plt.tight_layout()
     
     print("\nExcitatory Synchrony = {}".format(synchrony))
-   
-    results = dict([('stats',stats),('synchrony', synchrony),('Population Rate Monitor',PRMi)])   
-    result_filename = "Results_W_N{0}_p{1}_{2}.pickle".format(N,p,i) 
-    with open(result_filename, "wb") as f:
-        pickle.dump(results, f)    
+
+    stats['synchrony'] = synchrony
+    stats['Population Rate Monitor'] = PRM
+    
+    result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index) 
+    with open(result_filename, "wb") as rf:
+        pickle.dump(stats, rf)    
    
