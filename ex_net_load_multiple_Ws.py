@@ -10,6 +10,7 @@ try:
 except:
    import pickle
 
+import dill 
 
 from analyze import analyze_autocor
 
@@ -47,7 +48,7 @@ dv/dt = (-v+Er)/tau: volt
 
 vthreshold = -55*mV
 vreset = -65*mV
-refract = 10*ms
+refract = 1*ms
 transienttime = 100*ms
 simulationtime = 400*ms
 
@@ -66,9 +67,8 @@ S = Synapses(P,G, on_pre="v+=ext_mag")
 S.connect(j='i')
 #When source neuron fires a spike the target neuron will jump below value
 
-j = 0.1*mV #Weight of neuron connection
+j = 10*mV #Weight of neuron connection
 
-delta=2*ms
 
 S = Synapses(G, G,"w:volt",on_pre='v_post +=w') #Synapse from inhibitory neuron to inhibitory neuron
 S.connect()
@@ -141,9 +141,9 @@ for w_index in range(start_index, end_index+1):
     print("\nExcitatory Synchrony = {}".format(synchrony))
 
     stats['synchrony'] = synchrony
-    stats['Population Rate Monitor'] = PRM
+    stats['Population Rate Monitor'] = PRM.rate
     
     result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index) 
     with open(result_filename, "wb") as rf:
-        pickle.dump(stats, rf)    
+       dill.dump(stats, rf)    
    
