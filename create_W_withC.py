@@ -11,6 +11,7 @@ from scipy import linalg, special
 import math
 import matplotlib.pyplot as plt
 import warnings
+import produceW
 
 class MyException(Exception):
     pass
@@ -173,23 +174,6 @@ def createW(N, L, p_AVG, alpha_recip, alpha_conv, alpha_div, alpha_chain):
         print("|A^2 + B^2 - F| leq {0}".format(checkFmat)) 
     
         # Now we get to the fun part where we calculate W
-        X = np.random.standard_normal((N,N)) # random matrix of iid standard normal entries
-        Z = np.zeros((N,N)) # Z = SX, a random vector with entries iid standard normal
-        # Z is Gaussian with covariance matrix approximately Sigma (ones)
-        W = np.zeros((N,N)) # dichomatized Z
-        
-        for i in range(N):
-            for j in range(N):
-                Z[i,j] = A[i,j]*X[i,j] + B[i,j]*X[j,i]
-                for n in range(N):
-                    if (n != i) and (n != j):
-                        Z[i,j] = Z[i,j] + c*M_tilde[i,j]*M_tilde[i,n]*X[i,n] + d*M_tilde[i,j]*M_tilde[n,j]*X[n,j] + e*M_tilde[i,j]*(M_tilde[j,n]*X[j,n] + M_tilde[n,i]*X[n,i])
-                if Z[i,j] >= M_theta[i,j]:
-                    W[i,j]=1
-                else:
-                    W[i,j]=0
-            if (i%50 == 0):
-                print("row={0} out of N={1}".format(i,N))
-        print("\n")
+        W = produceW.produceW(A, B, M_tilde, M_theta, c, d, e, N)
         
     return(W)
