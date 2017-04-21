@@ -174,6 +174,6 @@ def createW(N, L, p_AVG, alpha_recip, alpha_conv, alpha_div, alpha_chain):
         print("|A^2 + B^2 - F| leq {0}".format(checkFmat)) 
     
         # Now we get to the fun part where we calculate W
-        W = produceW.produceW(A, B, M_tilde, M_theta, c, d, e, N)
+        W = np.array(produceW.produceW(A, B, M_tilde, M_theta, c, d, e, N))
         
     return(W)
