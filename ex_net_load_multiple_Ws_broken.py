@@ -29,7 +29,7 @@ numpy.set_printoptions(threshold=numpy.nan)
 import matplotlib.pyplot as plt
 import math
 
-start_scope()
+#start_scope()
 
 N = 1000 #Number of excitatory neurons
 p_AVG =0.04
@@ -54,25 +54,17 @@ simulationtime = 1000*ms
 
 #Neuron Groups
 
-G = NeuronGroup(N, eqs, threshold='v>-55*mV', reset='v=-65*mV', refractory='refract', method='euler')
-
-G.v='vreset+(vthreshold-vreset)*rand()'
-
-
 ext_rate=300*Hz
 ext_mag=1*mV
 
-P = PoissonGroup(N, ext_rate)
-Sp = Synapses(P,G, on_pre="v+=ext_mag")
-Sp.connect(j='i')
+
 #When source neuron fires a spike the target neuron will jump below value
 
-j = 0.2*mV #Weight of neuron connection
+j = .1*mV #Weight of neuron connection
 
 
-S = Synapses(G, G,"w:volt",on_pre='v_post +=w') #Synapse from inhibitory neuron to inhibitory neuron
-S.connect()
-#SII.connect(condition='i!=j', p=pii)
+#S = Synapses(G, G,"w:volt",on_pre='v_post +=w') #Synapse from inhibitory neuron to inhibitory neuron
+#S.connect()
 
 ######Load in matrix
 #L = math.inf
@@ -83,6 +75,17 @@ start_index = int(input_orig("enter a starting index: "))
 end_index = int(input_orig("enter end index: "))
 
 for w_index in range(start_index, end_index+1):
+    G = NeuronGroup(N, eqs, threshold='v>-55*mV', reset='v=-65*mV', refractory='refract', method='euler')
+    G.v='vreset+(vthreshold-vreset)*rand()'
+    
+    P = PoissonGroup(N, ext_rate)
+    Sp = Synapses(P,G, on_pre="v+=ext_mag")
+    Sp.connect(j='i')
+    
+    S = Synapses(G, G,"w:volt",on_pre='v_post +=w') #Synapse from inhibitory neuron to inhibitory neuron
+    S.connect()
+    
+    net = Network(P, Sp, G, S)
     
     filename = "matrices\W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index)
     #"ws/W_N{0}_L{1}_c{2}_d{3}_ch{4}.pickle".format(NI,L,alpha_conv,alpha_div,alpha_chain)
@@ -106,46 +109,57 @@ for w_index in range(start_index, end_index+1):
     
     S.w=W.transpose().flatten()*j
     
+
     statemon = StateMonitor(G, 'v', record=0)
     spikemon = SpikeMonitor(G)
     
     PRM = PopulationRateMonitor(G)
     
-    
-    
-    run(transienttime)
+    net.run(transienttime)
     
     if spikemon.num_spikes > (transienttime*N/refract*0.5):
-        print("\nnetwork saturated, skipping matrix {0}\n".format(w_index))
+        print("\nnetwork saturated, skipping matrix\n")
         stats['saturated'] = True
         result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index) 
         with open(result_filename, "wb") as rf:
             dill.dump(stats, rf)
         continue
     if spikemon.num_spikes < (2*N):
-        print("\nnetwork not spiking, skipping matrix {0}\n".format(w_index))
+        print("\nnetwork not spiking, skipping matrix\n")
         stats['not spiking'] = True
         result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index) 
         with open(result_filename, "wb") as rf:
             dill.dump(stats, rf)
         continue
     print("number of spikes in transient: {0}".format(spikemon.num_spikes))
-    #for k,v in stats:
-    #    print(k+":{0}".format(v))
     
-
+    
+    
     
     # reset before run(simulationtime)
-    statemon = StateMonitor(G, 'v', record=0)
-    spikemon = SpikeMonitor(G)
+    G = NeuronGroup(N, eqs, threshold='v>-55*mV', reset='v=-65*mV', refractory='refract', method='euler')
+    G.v='vreset+(vthreshold-vreset)*rand()'
     
-    PRM = PopulationRateMonitor(G)    
-    run(simulationtime)
+    P = PoissonGroup(N, ext_rate)
+    Sp = Synapses(P,G, on_pre="v+=ext_mag")
+    Sp.connect(j='i')
+    
+    S = Synapses(G, G,"w:volt",on_pre='v_post +=w') #Synapse from inhibitory neuron to inhibitory neuron
+    S.connect()
+    S.w=W.transpose().flatten()*j
+    
+    net = Network(P, Sp, G, S)
+    
+    statemon = StateMonitor(G, 'v', record=0)
+    spikemon = SpikeMonitor(G)    
+    PRM = PopulationRateMonitor(G)
+    
+    net.run(simulationtime)
+    
     
     synchrony = analyze_autocor(PRM.rate)
     
-    
-    figure(figsize=(20,10))
+    figure(figsize=(16,10))
     #subplot(122)
     #plot(statemon.t/ms, statemon.v[0])
     #xlabel('Time (ms)')
