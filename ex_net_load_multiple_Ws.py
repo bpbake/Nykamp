@@ -63,8 +63,8 @@ ext_rate=300*Hz
 ext_mag=1*mV
 
 P = PoissonGroup(N, ext_rate)
-S = Synapses(P,G, on_pre="v+=ext_mag")
-S.connect(j='i')
+Sp = Synapses(P,G, on_pre="v+=ext_mag")
+Sp.connect(j='i')
 #When source neuron fires a spike the target neuron will jump below value
 
 j = 10*mV #Weight of neuron connection
