@@ -10,7 +10,7 @@ try:
 except:
    import pickle
 
-import dill 
+#import dill #pickle works fine
 
 from analyze import analyze_autocor
 
@@ -68,6 +68,11 @@ j = 0.2*mV #Weight of neuron connection
 S = Synapses(G, G,"w:volt",on_pre='v_post +=w') #Synapse from inhibitory neuron to inhibitory neuron
 S.connect()
 
+statemon = StateMonitor(G, 'v', record=0)
+spikemon = SpikeMonitor(G)
+
+PRM = PopulationRateMonitor(G)
+
 store() # record state of simulation for future reference
 
 #SII.connect(condition='i!=j', p=pii)
@@ -109,14 +114,14 @@ for w_index in range(start_index, end_index+1):
         stats['saturated'] = True # add to the stats dict
         result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index) 
         with open(result_filename, "wb") as rf:
-            dill.dump(stats, rf) #pickle the new stats dict 
+            pickle.dump(stats, rf) #pickle the new stats dict 
         continue # go to next matrix
     if spikemon.num_spikes < (2*N): # if the number of spikes is too small, we assume it's not spiking
         print("\nnetwork not spiking, skipping matrix {0}\n".format(w_index))
         stats['not spiking'] = True #add to the stats dict
         result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index)  
         with open(result_filename, "wb") as rf:
-            dill.dump(stats, rf) # pickle the new stats file
+            pickle.dump(stats, rf) # pickle the new stats file
         continue # go to next matrix
     print("\nnumber of spikes in transient: {0}\n".format(spikemon.num_spikes))
     
@@ -155,9 +160,11 @@ for w_index in range(start_index, end_index+1):
     
     # add to the stats dict
     stats['synchrony'] = synchrony
-    stats['Population Rate Monitor'] = PRM.rate/hertz 
+    stats['PRM rate'] = PRM.rate/hertz
+    stats['PRM time'] = PRM.t/ms
+    stats['spikemon times'] = spikemon.t/ms
+    stats['spikemon index'] = spikemon.i/1
     
     result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index) 
     with open(result_filename, "wb") as rf:
-       dill.dump(stats, rf) # pickle the new stats dict
-   
+       pickle.dump(stats, rf) # pickle the new stats dict 
