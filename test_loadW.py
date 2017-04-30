@@ -35,7 +35,8 @@ with open(stat_filename, 'rb') as sf:
     except (EOFError):
         print("unpickling error")
 
-print(stats)
+for k,v in sorted(stats.items()):
+    print(k+":{0}".format(v))
 
 # add a new entry to the stats dictionary
 stats["hi"] = 5 #key= "hi", value=5
