@@ -12,6 +12,7 @@ except:
 
 #import dill #pickle works fine
 
+
 from analyze import analyze_autocor
 
 try:
@@ -46,6 +47,7 @@ dv/dt = (-v+Er)/tau: volt
 vthreshold = -55*mV
 vreset = -65*mV
 refract = 1*ms
+
 transienttime = 500*ms
 simulationtime = 1000*ms
 
@@ -63,7 +65,6 @@ Sp.connect(j='i')
 #When source neuron fires a spike the target neuron will jump below value
 
 j = 0.2*mV #Weight of neuron connection
-
 
 S = Synapses(G, G,"w:volt",on_pre='v_post +=w') #Synapse from inhibitory neuron to inhibitory neuron
 S.connect()
@@ -167,4 +168,4 @@ for w_index in range(start_index, end_index+1):
     
     result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index) 
     with open(result_filename, "wb") as rf:
-       pickle.dump(stats, rf) # pickle the new stats dict 
+       pickle.dump(stats, rf) # pickle the new stats dict
