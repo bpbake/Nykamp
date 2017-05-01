@@ -46,5 +46,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Python Cache
+# Other Directories to ignore
 __pycache__
+matrices
