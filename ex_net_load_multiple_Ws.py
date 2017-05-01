@@ -164,7 +164,7 @@ for w_index in range(start_index, end_index+1):
     stats['PRM rate'] = PRM.rate/hertz
     stats['PRM time'] = PRM.t/ms
     stats['spikemon times'] = spikemon.t/ms
-    stats['spikemon index'] = spikemon.i/1
+    stats['spikemon indices'] = spikemon.i/1
     
     result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index) 
     with open(result_filename, "wb") as rf:
