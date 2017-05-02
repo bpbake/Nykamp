@@ -49,7 +49,7 @@ vreset = -65*mV
 refract = 1*ms
 
 transienttime = 500*ms
-simulationtime = 1000*ms
+simulationtime = 2000*ms
 
 #Neuron Groups
 G = NeuronGroup(N, eqs, threshold='v>-55*mV', reset='v=-65*mV', refractory='refract', method='euler')
@@ -64,7 +64,7 @@ Sp = Synapses(P,G, on_pre="v+=ext_mag")
 Sp.connect(j='i')
 #When source neuron fires a spike the target neuron will jump below value
 
-j = 0.2*mV #Weight of neuron connection
+j = 0.15*mV #Weight of neuron connection
 
 S = Synapses(G, G,"w:volt",on_pre='v_post +=w') #Synapse from inhibitory neuron to inhibitory neuron
 S.connect()
@@ -117,6 +117,7 @@ for w_index in range(start_index, end_index+1):
         with open(result_filename, "wb") as rf:
             pickle.dump(stats, rf) #pickle the new stats dict 
         continue # go to next matrix
+        
     if spikemon.num_spikes < (2*N): # if the number of spikes is too small, we assume it's not spiking
         print("\nnetwork not spiking, skipping matrix {0}\n".format(w_index))
         stats['not spiking'] = True #add to the stats dict
@@ -164,7 +165,7 @@ for w_index in range(start_index, end_index+1):
     stats['PRM rate'] = PRM.rate/hertz
     stats['PRM time'] = PRM.t/ms
     stats['spikemon times'] = spikemon.t/ms
-    stats['spikemon index'] = spikemon.i/1
+    stats['spikemon indices'] = spikemon.i/1
     
     result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index) 
     with open(result_filename, "wb") as rf:
