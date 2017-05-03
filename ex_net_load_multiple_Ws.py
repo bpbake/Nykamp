@@ -69,11 +69,11 @@ j = 0.15*mV #Weight of neuron connection
 S = Synapses(G, G,"w:volt",on_pre='v_post +=w') #Synapse from inhibitory neuron to inhibitory neuron
 S.connect()
 
-statemon = StateMonitor(G, 'v', record=0)
-spikemon = SpikeMonitor(G)
+transient_statemon = StateMonitor(G, 'v', record=0)
+transient_spikemon = SpikeMonitor(G)
 
-PRM = PopulationRateMonitor(G)
-
+transient_PRM = PopulationRateMonitor(G)
+ 
 store() # record state of simulation for future reference
 
 #SII.connect(condition='i!=j', p=pii)
@@ -83,6 +83,8 @@ start_index = int(input_orig("enter a starting index: "))
 end_index = int(input_orig("enter end index: "))
 
 for w_index in range(start_index, end_index+1):
+    
+    print (w_index)
     
     restore() # set the state back to what it was when the store() command was called
     
@@ -103,14 +105,14 @@ for w_index in range(start_index, end_index+1):
     
     S.w=W.transpose().flatten()*j
     
-    statemon = StateMonitor(G, 'v', record=0)
-    spikemon = SpikeMonitor(G)
-    
-    PRM = PopulationRateMonitor(G)
+#    statemon = StateMonitor(G, 'v', record=0)
+#    spikemon = SpikeMonitor(G)
+#    
+#    PRM = PopulationRateMonitor(G)
     run(transienttime)
     
     
-    if spikemon.num_spikes > (transienttime*N/refract*0.5): # if the number of spikes it too large, assume it's saturated
+    if transient_spikemon.num_spikes > (transienttime*N/refract*0.5): # if the number of spikes it too large, assume it's saturated
         print("\nnetwork saturated, skipping matrix {0}\n".format(w_index))
         stats['saturated'] = True # add to the stats dict
         result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index) 
@@ -118,14 +120,14 @@ for w_index in range(start_index, end_index+1):
             pickle.dump(stats, rf) #pickle the new stats dict 
         continue # go to next matrix
         
-    if spikemon.num_spikes < (2*N): # if the number of spikes is too small, we assume it's not spiking
+    if transient_spikemon.num_spikes < (2*N): # if the number of spikes is too small, we assume it's not spiking
         print("\nnetwork not spiking, skipping matrix {0}\n".format(w_index))
         stats['not spiking'] = True #add to the stats dict
         result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index)  
         with open(result_filename, "wb") as rf:
             pickle.dump(stats, rf) # pickle the new stats file
         continue # go to next matrix
-    print("\nnumber of spikes in transient: {0}\n".format(spikemon.num_spikes))
+    print("\nnumber of spikes in transient: {0}\n".format(transient_spikemon.num_spikes))
     
     
     for k,v in sorted(stats.items()):
@@ -134,39 +136,45 @@ for w_index in range(start_index, end_index+1):
         
     
     # reset before run(simulationtime)
-    statemon = StateMonitor(G, 'v', record=0)
-    spikemon = SpikeMonitor(G)
+    simulation_statemon = StateMonitor(G, 'v', record=0)
+    simulation_spikemon = SpikeMonitor(G)
     
-    PRM = PopulationRateMonitor(G)    
+    simulation_PRM = PopulationRateMonitor(G)   
     run(simulationtime)
-    
-    synchrony = analyze_autocor(PRM.rate)
+
+    synchrony = analyze_autocor(simulation_PRM.rate)
     
     #plot the results of the simulation
-    figure(figsize=(20,10))
-    #subplot(122)
-    #plot(statemon.t/ms, statemon.v[0])
-    #xlabel('Time (ms)')
-    #ylabel('v')
-    
-    subplot(211)
-    plot(spikemon.t/ms,spikemon.i, '.k')
-    xlabel('Time (ms)')
-    ylabel('Neuron index')
-    plt.tight_layout()
-    
-    subplot(212)
-    plot(PRM.t/ms,PRM.smooth_rate(window='flat', width=0.5*ms)/Hz)
+#    figure(figsize=(20,10))
+#    #subplot(122)
+#    #plot(simulation_statemon.t/ms, simulation_statemon.v[0])
+#    #xlabel('Time (ms)')
+#    #ylabel('v')
+#    
+#    subplot(211)
+#    plot(simulation_spikemon.t/ms,simulation_spikemon.i, '.k')
+#    xlabel('Time (ms)')
+#    ylabel('Neuron index')
+#    plt.tight_layout()
+#    
+#    subplot(212)
+#    plot(simulation_PRM.t/ms,simulation_PRM.smooth_rate(window='flat', width=0.5*ms)/Hz)
     
     print("\nExcitatory Synchrony = {0}\n".format(synchrony))
     
     # add to the stats dict
     stats['synchrony'] = synchrony
-    stats['PRM rate'] = PRM.rate/hertz
-    stats['PRM time'] = PRM.t/ms
-    stats['spikemon times'] = spikemon.t/ms
-    stats['spikemon indices'] = spikemon.i/1
+    stats['PRM rate'] = simulation_PRM.rate/hertz
+    stats['PRM time'] = simulation_PRM.t/ms
+    stats['spikemon times'] = simulation_spikemon.t/ms
+    stats['spikemon indices'] = simulation_spikemon.i/1
     
+    #delete monitors so they don't cause restore to get an error when looped through
+    
+    del simulation_statemon 
+    del simulation_spikemon 
+    del simulation_PRM 
+
     result_filename = "matrices\Results_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,w_index) 
     with open(result_filename, "wb") as rf:
        pickle.dump(stats, rf) # pickle the new stats dict
