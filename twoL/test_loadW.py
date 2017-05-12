@@ -14,12 +14,12 @@ import numpy as np
 import math
 
 N = 3000
-p_AVG= 50/N
-i = 5
+p = 50/N
+i = 500
 print("N={0}".format(N))
 
 #read in pickled W matrix
-W_filename = "matrices\W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,i)
+W_filename = "matrices\W_N{0}_p{1}_{2}.pickle".format(N,p,i)
 
 with open(W_filename, 'rb') as wf:
     try:
@@ -28,7 +28,7 @@ with open(W_filename, 'rb') as wf:
         print("unpickling error")
 
 # reading in pickled stats file:        
-stat_filename = "matrices\Stats_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,i)
+stat_filename = "matrices\Stats_W_N{0}_p{1}_{2}.pickle".format(N,p,i)
 with open(stat_filename, 'rb') as sf:
     try:
         stats = pickle.load(sf)

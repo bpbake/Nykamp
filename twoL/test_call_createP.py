@@ -15,7 +15,7 @@ p_AVG = 50/N
 
 #L_left = math.exp(np.random.uniform(1.2, 5))*(N/100)
 #L_right = math.exp(np.random.uniform(1.2, 5))*(N/100)
-L_left = 100#*(N/100)
+L_left = 20000#*(N/100)
 L_right = 0#1e-100
 
 #alpha_recip = np.random.uniform(0, 0.3)

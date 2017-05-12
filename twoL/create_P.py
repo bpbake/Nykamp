@@ -17,6 +17,8 @@ class MyException(Exception):
     pass
 
 def create_P(N, L_left, L_right, p_AVG):
+    print("creating P")
+    
     threshold = 1e100
     
     p = np.zeros(N)
@@ -51,6 +53,7 @@ def create_P(N, L_left, L_right, p_AVG):
     
     p_max = np.ndarray.max(p)
     p_min = np.ndarray.min(p)
+    print("p_max = {0}".format(p_max))
     
     p_valid = True #make sure our entries in P are between 0 and 1
     if (p_max>1) or (p_min<0):

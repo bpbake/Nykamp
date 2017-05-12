@@ -14,8 +14,8 @@ except:
 
 import sys
 
-N = 1000 #minimum of 1000
-p_AVG = 0.04
+N = 3000 #minimum of 1000
+p_AVG = 50/N
 
 if len(sys.argv) >= 3:
    start_index = int(sys.argv[1])
@@ -33,7 +33,7 @@ for i in range(start_index, start_index+num_matrices): #so i=start_index, start_
             print("\nmaking matrix {0}".format(i))
             
             #generate L, alphas
-            L = math.exp(np.random.uniform(1.2, 5))*(N/100)
+            L = math.exp(np.random.uniform(1.2, 5))#*(N/100)
             alpha_recip = np.random.uniform(0, 0.3)
             alpha_conv = np.random.uniform(0, 0.3)
             alpha_div = np.random.uniform(0, 0.3)

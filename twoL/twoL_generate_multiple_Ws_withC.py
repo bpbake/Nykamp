@@ -15,8 +15,8 @@ except:
 
 import sys
 
-N = 1000 #minimum of 1000
-p_AVG = 0.04
+N = 3000 #minimum of 1000
+p_AVG = 50/N
 
 if len(sys.argv) >= 3:
    start_index = int(sys.argv[1])
@@ -34,17 +34,25 @@ for i in range(start_index, start_index+num_matrices): #so i=start_index, start_
             print("\nmaking matrix {0}".format(i))
             
             #generate Ls, alphas
-            L_left = math.exp(np.random.uniform(1.2, 5))*(N/100)
-            L_right = math.exp(np.random.uniform(1.2, 5))*(N/100)
-            alpha_recip = np.random.uniform(0, 0.3)
-            alpha_conv = np.random.uniform(0, 0.3)
-            alpha_div = np.random.uniform(0, 0.3)
-            alpha_chain = np.random.uniform(-0.4, 0.3)
+            # L_left = math.exp(np.random.uniform(4.5, 10))# L=[90,22000]ish
+            # L_right = 0 #math.exp(np.random.uniform(4.5, 10))
+            # alpha_recip = np.random.uniform(0, 0.3)
+            # alpha_conv = np.random.uniform(0, 0.3)
+            # alpha_div = np.random.uniform(0, 0.3)
+            # alpha_chain = np.random.uniform(-0.4, 0.3)
+            L_left = 45
+            L_right = 45
+            alpha_recip = 0.3
+            alpha_conv = 0.3
+            alpha_div = 0.3
+            alpha_chain = 0.3
 
             P = create_P(N, L_left, L_right, p_AVG)
+            print("P has been created \n")
             
             #call other program to create W (and return W)
             W = create_W(N, P, alpha_recip, alpha_conv, alpha_div, alpha_chain)
+            print("W has been created \n")
             
             #save the W
             W_filename = "matrices/W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,i)
@@ -64,6 +72,16 @@ for i in range(start_index, start_index+num_matrices): #so i=start_index, start_
             stat_filename = "matrices/Stats_W_N{0}_p{1}_{2}.pickle".format(N,p_AVG,i) #pickle the dictionary of stats for each W
             with open(stat_filename, "wb") as f:
                 pickle.dump(stats, f)
+
+            print("W and stats have been pickled")
+
+            # print the stats
+            for k,v in sorted(stats.items()):
+                print(k+":{0}".format(v))
+
+            # plot the W matrix
+            plt.matshow(W)
+            plt.show()
                 
             trying = False
                 
